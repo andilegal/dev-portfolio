@@ -1,7 +1,7 @@
 export type ProjectPageProps = {
-  slug: "projects";
-  title: "projects";
-  type: "projects";
+  slug: string;
+  title: string;
+  type: string;
   metadata: {
     heading: string;
     projects: Project[]

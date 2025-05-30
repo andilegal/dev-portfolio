@@ -5,79 +5,38 @@ import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { ExternalLink, Github, ChevronDown, ChevronUp } from "lucide-react";
 import { ProjectPageProps } from "@/app/projects/projects.type";
-
-type Project = {
-  id: number;
-  title: string;
-  description: string;
-  technologies: string[];
-  demoUrl?: string;
-  githubUrl?: string;
-  imageUrl: string;
-};
-
-const projects: Project[] = [
-  {
-    id: 1,
-    title: "Dashboard Alpha",
-    description:
-      "Painel analítico com filtros dinâmicos, exportações detalhadas e visualizações em tempo real. Ideal para transformar dados em decisões rápidas e estratégicas.",
-    technologies: ["React", "TypeScript", "TailwindCSS"],
-    demoUrl: "https://demo-alpha.com",
-    githubUrl: "https://github.com/usuario/projeto-alpha",
-    imageUrl: "/images/projeto-alpha.png",
-  },
-  {
-    id: 2,
-    title: "E-commerce Beta",
-    description:
-      "Loja virtual moderna com checkout fluido, rastreamento de pedidos em tempo real e painel administrativo intuitivo. Desenvolvido com foco em escalabilidade.",
-    technologies: ["Next.js", "Node.js", "MongoDB"],
-    demoUrl: "https://demo-beta.com",
-    githubUrl: "https://github.com/usuario/projeto-beta",
-    imageUrl: "/images/projeto-beta.png",
-  },
-  {
-    id: 3,
-    title: "Sistema Gamma",
-    description:
-      "Gerencie processos com eficiência: login seguro, controle em tempo real com WebSocket e interface personalizável. Pensado para produtividade máxima.",
-    technologies: ["Vue.js", "Firebase", "TailwindCSS"],
-    githubUrl: "https://github.com/usuario/projeto-gamma",
-    imageUrl: "/images/projeto-gamma.png",
-  },
-];
-
-const allTechnologies = Array.from(
-  new Set(projects.flatMap((p) => p.technologies))
-).sort();
+import Image from "next/image";
 
 export function WorkDisplay({ data }: { data: ProjectPageProps }) {
-  console.log(data);
   const heading = data.metadata.heading;
+  const projectsData = data.metadata.projects;
 
   const [filter, setFilter] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
   const [animatedText, setAnimatedText] = useState("");
   const [mounted, setMounted] = useState(false);
 
+  const { resolvedTheme } = useTheme();
+  const isDark = mounted && resolvedTheme === "dark";
+
+  const allTechnologies = Array.from(
+    new Set(projectsData.flatMap((p) => p.technologies.split(",")))
+  ).sort();
+
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
 
   const toggleExpand = (id: number) =>
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const filteredProjects = filter
-    ? projects.filter((p) =>
-        p.technologies.some(
-          (tech) => tech.toLowerCase() === filter.toLowerCase()
-        )
+    ? projectsData.filter((p) =>
+        p.technologies
+          .split(",")
+          .some((tech) => tech.toLowerCase() === filter.toLowerCase())
       )
-    : projects;
+    : projectsData;
 
   useEffect(() => {
     let i = 0;
@@ -89,13 +48,11 @@ export function WorkDisplay({ data }: { data: ProjectPageProps }) {
     return () => clearInterval(interval);
   }, [heading]);
 
-  if (!mounted) return null;
-
   return (
     <div
       className={
         isDark
-          ? "min-h-screen  py-26 bg-slate-900 text-slate-100 transition-colors duration-300"
+          ? "min-h-screen py-26 bg-slate-900 text-slate-100 transition-colors duration-300"
           : "min-h-screen py-26 bg-white text-slate-900 transition-colors duration-300"
       }
     >
@@ -154,24 +111,18 @@ export function WorkDisplay({ data }: { data: ProjectPageProps }) {
         {/* Grid de projetos */}
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {filteredProjects.length === 0 && (
-            <p
-              className={
-                isDark
-                  ? "text-center text-slate-500 col-span-full"
-                  : "text-center text-slate-500 col-span-full"
-              }
-            >
+            <p className="text-center text-slate-500 col-span-full">
               Nenhum projeto encontrado para <strong>{filter}</strong>.
             </p>
           )}
 
           {filteredProjects.map((project, i) => {
-            const isExpanded = expanded[project.id];
+            const isExpanded = expanded[i];
             const shouldExpand = project.description.length > 200;
 
             return (
               <motion.article
-                key={project.id}
+                key={i}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.2 }}
@@ -194,7 +145,12 @@ export function WorkDisplay({ data }: { data: ProjectPageProps }) {
                       : "relative h-48 bg-blue-100 flex items-center justify-center text-blue-500"
                   }
                 >
-                  <ExternalLink className="w-12 h-12 opacity-30" />
+                  <Image
+                    src={project.image?.url || ""}
+                    alt={project.title}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
 
                 <div className="p-5">
@@ -231,7 +187,7 @@ export function WorkDisplay({ data }: { data: ProjectPageProps }) {
 
                   {shouldExpand && (
                     <button
-                      onClick={() => toggleExpand(project.id)}
+                      onClick={() => toggleExpand(i)}
                       className={
                         isDark
                           ? "flex items-center gap-1 text-blue-400 hover:underline text-xs font-medium"
@@ -251,7 +207,7 @@ export function WorkDisplay({ data }: { data: ProjectPageProps }) {
                   )}
 
                   <div className="flex flex-wrap gap-2 mt-4 mb-5">
-                    {project.technologies.map((tech) => (
+                    {project.technologies.split(",").map((tech) => (
                       <span
                         key={tech}
                         className={
@@ -266,9 +222,9 @@ export function WorkDisplay({ data }: { data: ProjectPageProps }) {
                   </div>
 
                   <div className="flex gap-3">
-                    {project.demoUrl && (
+                    {project.demourl && (
                       <a
-                        href={project.demoUrl}
+                        href={project.demourl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-full text-xs font-semibold shadow hover:bg-blue-700 transition"
@@ -276,9 +232,9 @@ export function WorkDisplay({ data }: { data: ProjectPageProps }) {
                         <ExternalLink className="w-4 h-4" /> Demo
                       </a>
                     )}
-                    {project.githubUrl && (
+                    {project.githuburl && (
                       <a
-                        href={project.githubUrl}
+                        href={project.githuburl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 px-4 py-2 bg-gray-800 text-white rounded-full text-xs font-semibold shadow hover:bg-gray-900 transition"

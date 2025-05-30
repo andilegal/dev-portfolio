@@ -9,172 +9,127 @@ import { DarkModeToggle } from "../dark-mode-toggle";
 import { useTheme } from "next-themes";
 import { MenuItemProps } from "./menu.type";
 
-const menuVariants = {
-  hidden: { opacity: 0, y: -20, rotateX: -15 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    rotateX: 0,
-    transition: {
-      delay: i * 0.08,
-      type: "spring",
-      stiffness: 300,
-      damping: 20,
-    },
-  }),
-};
-
 export function Menu({ data }: { data: MenuItemProps[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
-
   const [mounted, setMounted] = useState(false);
 
+  useEffect(() => setMounted(true), []);
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (open && mobileMenuRef.current) {
-      mobileMenuRef.current.focus();
-    }
+    if (open && mobileMenuRef.current) mobileMenuRef.current.focus();
   }, [open]);
-
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  function handleMouseMove(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
-  }
-
-  const backgroundGradient = isDark
-    ? `radial-gradient(circle 250px at ${mousePos.x}px ${mousePos.y}px, rgba(96, 165, 250, 0.2), transparent 60%)`
-    : `radial-gradient(circle 300px at ${mousePos.x}px ${mousePos.y}px, rgba(147, 197, 253, 0.25), transparent 60%)`;
-
-  const headerClasses = [
-    "fixed top-0 w-full z-50 transition-colors duration-300 backdrop-blur-lg",
-    scrolled
-      ? "bg-white/90 dark:bg-slate-900/80 shadow-xl"
-      : "bg-[#e0f2fe] dark:bg-slate-900",
-  ].join(" ");
-
-  const logoStyle = {
-    color: "#ffffff",
-    textShadow:
-      "0 0 5px rgba(255,255,255,0.3), 0 0 10px rgba(255,255,255,0.4), 0 0 15px rgba(96,165,250,0.4)",
-    transition: "color 0.3s ease",
-  };
-
   if (!mounted) return null;
+
+  const headerLightBg = scrolled
+    ? "bg-white border-b border-gray-300 shadow-sm"
+    : "bg-white border-b border-gray-200";
+
+  const headerDarkBg = scrolled
+    ? "bg-[#121721] border-b border-[#2e3a59] shadow-md"
+    : "bg-[#1e263a] border-b border-[#2e3a59]";
 
   return (
     <header
-      className={headerClasses}
-      onMouseMove={handleMouseMove}
-      style={{
-        background: `
-          ${backgroundGradient},
-          ${
-            isDark
-              ? "linear-gradient(90deg, #1e293b 0%, #334155 50%, #475569 100%)"
-              : "linear-gradient(90deg, #dbeafe 0%, #bfdbfe 50%, #93c5fd 100%)"
-          }
-        `,
-        backgroundBlendMode: "screen",
-      }}
+      className={`fixed top-0 w-full z-50 transition-colors duration-300 backdrop-blur-sm ${
+        isDark ? headerDarkBg : headerLightBg
+      }`}
     >
-      <motion.div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 animate-gradient bg-gradient-to-r from-blue-300 via-blue-200 to-blue-400 dark:from-slate-800 dark:via-slate-700 dark:to-slate-900"
-        style={{ filter: "blur(60px)" }}
-        animate={{ backgroundPosition: ["0% 50%", "100% 50%"] }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-      />
-
-      <div className="relative max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-        {/* Logo */}
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        {/* Logo com animação pulsante, sem underline */}
         <motion.div
-          whileHover={{
-            scale: 1.2,
-            textShadow:
-              "0 0 8px #3b82f6, 0 0 15px #3b82f6, 0 0 25px #60a5fa, 0 0 40px #60a5fa",
+          initial={{ scale: 1, textShadow: "0 0 0 rgba(0,0,0,0)" }}
+          animate={{
+            scale: [1, 1.05, 1],
+            textShadow: isDark
+              ? [
+                  "0 0 10px rgba(6,182,212,0.7)",
+                  "0 0 20px rgba(6,182,212,1)",
+                  "0 0 10px rgba(6,182,212,0.7)",
+                ]
+              : [
+                  "0 0 8px rgba(59,130,246,0.7)",
+                  "0 0 16px rgba(59,130,246,1)",
+                  "0 0 8px rgba(59,130,246,0.7)",
+                ],
           }}
-          transition={{ type: "spring", stiffness: 250, damping: 20 }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
           <Link
             href="/"
-            className="text-4xl font-extrabold tracking-wide select-none cursor-pointer"
             aria-label="Ir para a página inicial"
-            style={logoStyle}
+            className={`font-extrabold text-3xl select-none cursor-pointer ${
+              isDark ? "text-cyan-400" : "text-blue-600"
+            }`}
           >
             Anderson
           </Link>
         </motion.div>
 
-        {/* Menu desktop + DarkModeToggle */}
+        {/* Menu Desktop */}
         <nav
           className="hidden lg:flex items-center space-x-8"
           aria-label="Menu principal"
         >
-          <ul className="flex space-x-12 text-lg font-bold text-white">
-            {data.map(({ title, slug }, i) => {
-              const isActive = pathname === slug;
+          <ul
+            className={`flex space-x-10 text-lg font-semibold ${
+              isDark ? "text-gray-300" : "text-gray-700"
+            }`}
+          >
+            {data.map(({ title, slug }) => {
+              const isActive =
+                pathname === slug || (slug === "home" && pathname === "/");
+
               return (
-                <motion.li
-                  key={slug}
-                  initial={{ opacity: 0, y: -10, rotateX: -15 }}
-                  animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                  transition={{
-                    delay: i * 0.1,
-                    type: "spring",
-                    stiffness: 300,
-                  }}
-                  className="list-none"
-                >
+                <li key={slug} className="relative list-none">
                   <Link
                     href={slug === "home" ? "/" : slug}
-                    className="relative group px-2 py-1 rounded-md"
                     aria-current={isActive ? "page" : undefined}
+                    className={`px-2 py-1 rounded relative transition-colors ${
+                      isActive
+                        ? isDark
+                          ? "text-cyan-400 font-bold"
+                          : "text-blue-600 font-bold"
+                        : isDark
+                        ? "hover:text-cyan-300"
+                        : "hover:text-blue-500"
+                    }`}
                   >
-                    <motion.span
-                      className={`transition-colors duration-300 ${
-                        isActive
-                          ? "text-blue-200 font-extrabold drop-shadow-lg"
-                          : "group-hover:text-blue-300"
-                      }`}
-                      whileHover={{ scale: 1.15, rotateZ: 3, originX: 0 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      {title}
-                    </motion.span>
+                    {title}
+
+                    {/* Underline animada */}
                     {isActive && (
                       <motion.span
                         layoutId="underline"
-                        className="absolute -bottom-2 left-0 h-1 w-full bg-blue-300 rounded-xl shadow-lg"
-                        initial={{ width: 0 }}
-                        animate={{ width: "100%" }}
-                        transition={{ type: "spring", stiffness: 300 }}
+                        className={`absolute left-0 -bottom-1 h-0.5 rounded-full ${
+                          isDark ? "bg-cyan-400" : "bg-blue-600"
+                        }`}
+                        initial={{ opacity: 0, scaleX: 0 }}
+                        animate={{ opacity: 1, scaleX: 1 }}
+                        exit={{ opacity: 0, scaleX: 0 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 30,
+                        }}
+                        style={{ transformOrigin: "left center" }}
                       />
                     )}
                   </Link>
-                </motion.li>
+                </li>
               );
             })}
           </ul>
-
-          <div className="ml-4">
+          <div className="ml-6">
             <DarkModeToggle />
           </div>
         </nav>
@@ -182,19 +137,21 @@ export function Menu({ data }: { data: MenuItemProps[] }) {
         {/* Botão mobile */}
         <motion.button
           onClick={() => setOpen(!open)}
-          className="lg:hidden text-white focus:outline-none"
-          animate={{ rotate: open ? 90 : 0 }}
-          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+          className={`lg:hidden focus:outline-none ${
+            isDark ? "text-cyan-400" : "text-gray-700"
+          }`}
           aria-label={open ? "Fechar menu" : "Abrir menu"}
           aria-controls="mobile-menu"
           aria-expanded={open}
           whileHover={{ scale: 1.1 }}
+          animate={{ rotate: open ? 90 : 0 }}
+          transition={{ type: "spring", stiffness: 200, damping: 15 }}
         >
-          {open ? <X size={32} /> : <MenuIcon size={32} />}
+          {open ? <X size={28} /> : <MenuIcon size={28} />}
         </motion.button>
       </div>
 
-      {/* Menu mobile */}
+      {/* Menu Mobile */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -205,49 +162,69 @@ export function Menu({ data }: { data: MenuItemProps[] }) {
             role="dialog"
             aria-modal="true"
             aria-label="Menu principal"
-            initial={{ opacity: 0, scale: 0.95, rotateX: -10 }}
-            animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-            exit={{ opacity: 0, scale: 0.95, rotateX: -10 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 180, damping: 25 }}
-            className="fixed top-0 left-0 w-full h-screen bg-[#bfdbfe] dark:bg-slate-900 z-40 flex flex-col items-center justify-center space-y-10 outline-none"
+            className={`fixed top-0 left-0 w-full h-screen z-40 flex flex-col items-center justify-center space-y-10 outline-none ${
+              isDark ? "bg-[#121721]" : "bg-white"
+            }`}
           >
             <button
               onClick={() => setOpen(false)}
-              className="absolute top-6 right-6 text-white hover:text-blue-200 transition-colors"
+              className={`absolute top-6 right-6 cursor-pointer focus:outline-none ${
+                isDark
+                  ? "text-cyan-400 hover:text-cyan-300"
+                  : "text-gray-700 hover:text-gray-900"
+              }`}
               aria-label="Fechar menu"
             >
               <X size={36} />
             </button>
 
-            <ul className="flex flex-col items-center space-y-10">
-              {data.map(({ title, slug }, i) => (
-                <motion.li
-                  key={slug}
-                  custom={i}
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
-                  variants={menuVariants}
-                  className="list-none"
-                >
-                  <Link
-                    href={slug === "home" ? "/" : slug}
-                    onClick={() => setOpen(false)}
-                    className="text-3xl font-extrabold text-white hover:text-blue-200 drop-shadow-md transition-colors"
-                    aria-current={pathname === slug ? "page" : undefined}
+            <ul
+              className={`flex flex-col items-center space-y-10 text-2xl font-semibold ${
+                isDark ? "text-cyan-400" : "text-gray-800"
+              }`}
+            >
+              {data.map(({ title, slug }) => {
+                const isActive =
+                  pathname === slug || (slug === "home" && pathname === "/");
+
+                return (
+                  <motion.li
+                    key={slug}
+                    custom={slug}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ delay: 0.1 }}
                   >
-                    {title}
-                  </Link>
-                </motion.li>
-              ))}
+                    <Link
+                      href={slug === "home" ? "/" : slug}
+                      onClick={() => setOpen(false)}
+                      className={`transition-colors border-b-2 ${
+                        isActive
+                          ? isDark
+                            ? "border-cyan-300 underline font-bold"
+                            : "border-blue-600 underline font-bold"
+                          : isDark
+                          ? "border-transparent hover:border-cyan-300 hover:text-cyan-300"
+                          : "border-transparent hover:border-blue-600 hover:text-blue-600"
+                      }`}
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      {title}
+                    </Link>
+                  </motion.li>
+                );
+              })}
 
               <motion.li
-                custom={data.length}
-                initial="hidden"
-                animate="visible"
-                exit="hidden"
-                variants={menuVariants}
-                className="list-none mt-8"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ delay: 0.3 }}
               >
                 <DarkModeToggle />
               </motion.li>
