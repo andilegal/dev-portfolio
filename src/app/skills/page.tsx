@@ -1,4 +1,4 @@
-import { SkillsShowcase } from "@/components/skills-showcase";
+import { SkillsShowcase } from "@/components/sections/skills-showcase";
 import { Metadata } from "next";
 
 export const generateMetadata = (): Metadata => {

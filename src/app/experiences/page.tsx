@@ -1,5 +1,5 @@
 import { Journey } from "@/components";
-import { ExperienceDataProps } from "@/components/journey/journey.type";
+import { ExperienceDataProps } from "@/components/sections/journey/journey.type";
 import { fetchPageBySlug } from "@/services/get-page-by-slug";
 import { Metadata } from "next";
 

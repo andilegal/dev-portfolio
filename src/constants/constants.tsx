@@ -1,4 +1,4 @@
-import { HeroDataProps } from "@/components/hero/hero.type";
+import { HeroDataProps } from "@/components/sections/hero/hero.type";
 import {
   SiEjs,
   SiAngular,

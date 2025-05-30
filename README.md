@@ -34,7 +34,7 @@ yarn install
 ```
 
 .env
-
 NEXT_READ_KEY=zipi3EHe18V3yF98qKhjy8nbDjyhkrhZsZhFKMXAVMlRTwNLb5
 NEXT_PUBLIC_BUCKET=dev-portfolio-production-5c5955e0-3cae-11f0-a736-c11fb7793795
 NEXT_PUBLIC_URL=https://api.cosmicjs.com/v3/buckets/${NEXT_PUBLIC_BUCKET}
+NEXT_PUBLIC_URL_FINAL=http://localhost:3000

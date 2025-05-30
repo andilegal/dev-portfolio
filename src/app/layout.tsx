@@ -3,7 +3,7 @@ import "./globals.css";
 import { Menu } from "@/components";
 import { ThemeProvider } from "next-themes";
 import { getMenu } from "@/services/get-menu";
-import { MenuItemProps } from "@/components/menu/menu.type";
+import { MenuItemProps } from "@/components/layout/menu/menu.type";
 
 export const metadata: Metadata = {
   title:

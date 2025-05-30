@@ -1,4 +1,4 @@
-import { MenuItemProps } from "@/components/menu/menu.type";
+import { MenuItemProps } from "@/components/layout/menu/menu.type";
 
 export async function getMenu() {
   const url = `${process.env.NEXT_PUBLIC_URL}/objects?read_key=${process.env.NEXT_READ_KEY}&bucket_id=${process.env.NEXT_PUBLIC_BUCKET}&props=slug,title,metadata.menu_title,metadata.menu_order&limit=20`;
