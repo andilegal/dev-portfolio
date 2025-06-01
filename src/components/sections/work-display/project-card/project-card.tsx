@@ -2,6 +2,7 @@ import { Project } from "@/app/projects/projects.type";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronUp, ExternalLink, Github } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export function ProjectCard({
   project,
@@ -35,7 +36,11 @@ export function ProjectCard({
           : "bg-white border border-slate-200"
       } rounded-2xl overflow-hidden shadow-lg transition-all duration-300`}
     >
-      <div
+      <Link
+        href={project.demourl ?? ""}
+        target="_blank"
+        title={`Link para ${project.title}`}
+        rel="noopener noreferrer"
         className={`relative h-48 flex items-center justify-center ${
           isDark ? "bg-slate-700 text-blue-300" : "bg-blue-100 text-blue-500"
         }`}
@@ -46,7 +51,7 @@ export function ProjectCard({
           fill
           className="object-cover"
         />
-      </div>
+      </Link>
 
       <div className="p-5">
         <h3
@@ -112,24 +117,24 @@ export function ProjectCard({
 
         <div className="flex gap-3">
           {project.demourl && (
-            <a
+            <Link
               href={project.demourl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-full text-xs font-semibold shadow hover:bg-blue-700 transition"
             >
               <ExternalLink className="w-4 h-4" /> Demo
-            </a>
+            </Link>
           )}
           {project.githuburl && (
-            <a
+            <Link
               href={project.githuburl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 px-4 py-2 bg-gray-800 text-white rounded-full text-xs font-semibold shadow hover:bg-gray-900 transition"
             >
               <Github className="w-4 h-4" /> GitHub
-            </a>
+            </Link>
           )}
         </div>
       </div>
